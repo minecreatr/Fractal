@@ -54,6 +54,12 @@ public class Main {
 
         //currentFractal = new Complex(0.36990800064524376, 0.15094139442964172);
 
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception exception){
+            System.out.println("tterrag lied!");
+        }
+
         //Create the frame
         JFrame frame = new JFrame("Fractal");
 
