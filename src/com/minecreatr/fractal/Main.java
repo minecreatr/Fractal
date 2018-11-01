@@ -1,7 +1,15 @@
 package com.minecreatr.fractal;
 
+import com.minecreatr.fractal.display.DisplayManager;
+import com.minecreatr.fractal.display.render.RenderFractalBlackAndWhite;
+import com.minecreatr.fractal.display.render.RenderFractalClassic;
+import com.minecreatr.fractal.logic.Fractal;
+import com.minecreatr.fractal.logic.JuliaFractalLogic;
+import com.minecreatr.fractal.math.Complex;
+
 import javax.swing.*;
 import java.awt.*;
+import java.net.URL;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -10,6 +18,8 @@ import java.util.Deque;
  * Cool Fractal
  *
  * 0.36990800064524376 0.15094139442964172i
+ *
+ * 0.13468250346083988 0.6263439833480323i purplw
  */
 
 public class Main {
@@ -23,19 +33,21 @@ public class Main {
 
     public static double HALF_HEIGHT;
 
-    public static Complex currentFractal = new Complex(0, 0);
+    //public Complex currentFractal = new Complex(0, 0);
 
-    public static FractalPanel fractalPanel;
+    //public Deque<Complex> previousFractals = new ArrayDeque<>();
 
-    public static ControlPanel controlPanel;
+    //public Deque<Complex> nextFractals = new ArrayDeque<>();
 
-    public static JLayeredPane layer;
+    //OHH RAINBOW
 
-    public static Deque<Complex> previousFractals = new ArrayDeque<>();
+    private DisplayManager displayManager;
 
-    public static Deque<Complex> nextFractals = new ArrayDeque<>();
+    private FractalManager fractalManager;
 
-    public static void main(String[] args){
+    private FractalGenerator fractalGenerator;
+
+    public void start(String[] args){
 
         if (args.length >= 2){
             try {
@@ -50,7 +62,7 @@ public class Main {
         HALF_WIDTH = WIDTH / 2;
         HALF_HEIGHT = HEIGHT /2;
 
-        currentFractal = Fractal.randomComplex();
+        //currentFractal = Fractal.randomComplex();
 
         //currentFractal = new Complex(0.36990800064524376, 0.15094139442964172);
 
@@ -60,28 +72,49 @@ public class Main {
             System.out.println("tterrag lied!");
         }
 
-        //Create the frame
-        JFrame frame = new JFrame("Fractal");
+        //Load Icon
+        URL iconURL = Main.class.getResource("/com/minecreatr/fractal/res/icon.png");
+        ImageIcon icon = new ImageIcon(iconURL);
 
-        //Create the layered pane
-        layer = new JLayeredPane();
-        frame.add(layer);
-        layer.setBounds(0, 0, WIDTH, HEIGHT);
+        this.fractalGenerator = new FractalGenerator();
 
-        //Create the control panel
-        controlPanel = new ControlPanel();
-        controlPanel.setSize(new Dimension(WIDTH/5, HEIGHT/5));
-        layer.add(controlPanel, 0);
+        this.fractalGenerator.addFractalType("julia", new JuliaFractalLogic());
+        this.fractalGenerator.addRenderType("classic", new RenderFractalClassic());
+        this.fractalGenerator.addRenderType("blackAndWhite", new RenderFractalBlackAndWhite());
 
-        //Create the fractal panel
-        fractalPanel = new FractalPanel();
-        fractalPanel.setSize(WIDTH, HEIGHT);
-        layer.add(fractalPanel, 1);
+        this.fractalGenerator.setFractalType("julia");
+        this.fractalGenerator.setRenderType("classic");
 
-        //Finalize Frame
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(WIDTH, HEIGHT);
-        frame.setVisible(true);
+        this.fractalManager = new FractalManager(new Fractal(new Complex(0.13468250346083988, 0.6263439833480323)));
+
+        this.displayManager = new DisplayManager(WIDTH, HEIGHT, "Fractal");
+        this.displayManager.setIcon(icon.getImage());
+        this.displayManager.initDisplay();
+
+
+//        //Create the frame
+//        JFrame frame = new JFrame("Fractal");
+//        frame.setIconImage(icon.getImage());
+//
+//        //Create the layered pane
+//        layer = new JLayeredPane();
+//        frame.add(layer);
+//        layer.setBounds(0, 0, WIDTH, HEIGHT);
+//
+//        //Create the control panel
+//        controlPanel = new ControlPanel();
+//        controlPanel.setSize(new Dimension(WIDTH/5, HEIGHT/5));
+//        layer.add(controlPanel, 0);
+//
+//        //Create the fractal panel
+//        fractalPanel = new FractalPanel();
+//        fractalPanel.setSize(WIDTH, HEIGHT);
+//        layer.add(fractalPanel, 1);
+//
+//        //Finalize Frame
+//        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        frame.setSize(WIDTH, HEIGHT);
+//        frame.setVisible(true);
 
 
 
@@ -135,4 +168,15 @@ public class Main {
 
         }
 
+    public FractalManager getFractalManager() {
+        return this.fractalManager;
+    }
+
+    public DisplayManager getDisplayManager() {
+        return this.displayManager;
+    }
+
+    public FractalGenerator getFractalGenerator() {
+        return this.fractalGenerator;
+    }
 }

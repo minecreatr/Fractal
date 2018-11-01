@@ -1,10 +1,10 @@
-package com.minecreatr.fractal;
+package com.minecreatr.fractal.display;
+
+import com.minecreatr.fractal.Bootstrap;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-
-import static com.minecreatr.fractal.Main.*;
 
 public class FractalPanel extends JPanel {
 
@@ -17,7 +17,7 @@ public class FractalPanel extends JPanel {
 //
 //        Graphics2D g = (Graphics2D) gIn;
 
-        BufferedImage image = Fractal.generateFractal();
+        BufferedImage image = Bootstrap.mainInstance.getFractalManager().getCurrentFractal().getImage();
         g.drawImage(image, 0, 0, null);
 //
 //        int width = Main.WIDTH / 5;

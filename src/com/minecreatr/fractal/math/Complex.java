@@ -1,4 +1,4 @@
-package com.minecreatr.fractal;
+package com.minecreatr.fractal.math;
 
 /**
  * Represents a complex number with the real imaginary form
