@@ -30,7 +30,7 @@ public class StorageHelper {
 
 
     public static void putData(int[] data, int x, int y, int iterations){
-        int index = (y * data[WIDTH_INDEX]) + x + OFFSET;
+        int index = getIndexFor(x, y, data[WIDTH_INDEX]);
         if (data[index]!=0){
             System.out.println("Overlap detected at " + x +" " + y+ " and index "+ index);
         }
@@ -40,7 +40,11 @@ public class StorageHelper {
     }
 
     public static int getData(int[] data, int x, int y){
-        return data[(y * data[WIDTH_INDEX]) + x + OFFSET];
+        return data[getIndexFor(x, y, data[WIDTH_INDEX])];
+    }
+
+    private static int getIndexFor(int x, int y, int width){
+        return (y * width) + x + OFFSET;
     }
 
     public static void putIfEmpty(int[] data, int x, int y, int iterations){
@@ -52,6 +56,68 @@ public class StorageHelper {
     private void nullify(int[] data){
         for (int i = 0 ; i < data.length ; i++){
             data[i] = 0;
+        }
+    }
+
+    public static boolean checkRegion(int[] data, int x, int y, int width, int height){
+        for (int i = 0; i < height ; i++){
+            int index = getIndexFor(x, y + i, data[WIDTH_INDEX]);
+            for (int j = 0 ; j < width ; j++){
+                if (data[index + j] != 0){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static DataWrapper wrap(int[] data){
+        return new DataWrapper(data);
+    }
+
+    public static class DataWrapper {
+
+        private int[] data;
+
+        public DataWrapper(int[] data){
+            this.data = data;
+        }
+
+        public int getHeight(){
+            return this.data[HEIGHT_INDEX];
+        }
+
+        public int getWidth(){
+            return this.data[WIDTH_INDEX];
+        }
+
+        public int getMaxIterations(){
+            return this.data[MAX_ITER_INDEX];
+        }
+
+        public int getData(int x, int y){
+            return StorageHelper.getData(this.data, x, y);
+        }
+        public void putData(int x, int y, int i){
+            StorageHelper.putData(this.data, x, y, i);
+        }
+
+        public void putIfEmpty(int x, int y, int i){
+            StorageHelper.putIfEmpty(this.data, x, y, i);
+        }
+
+        public int getSumSquare(int x, int y, int dim){
+            int tot = 0;
+            for (int xo = 0 ; xo < dim ; xo++){
+                for (int yo = 0 ; yo < dim ; yo++){
+                    tot += getData(x + xo, y + yo);
+                }
+            }
+            return tot;
+        }
+
+        public boolean checkRegion(int x, int y, int width, int height){
+            return StorageHelper.checkRegion(this.data, x, y, width, height);
         }
     }
 

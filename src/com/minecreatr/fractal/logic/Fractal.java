@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class Fractal {
 
-    public static final Random random = new Random();
+
 
     private static final int MAX_ITER = 256;
 
@@ -33,7 +33,7 @@ public class Fractal {
     }
 
     public Fractal(){
-        this(randomComplex());
+        this(Complex.randomComplex());
     }
 
     public BufferedImage getImage() {
@@ -140,18 +140,6 @@ public class Fractal {
 //        Main.controlPanel.dataImag.setText("Imaginary: " + Main.currentFractal.getImaginary() + "i");
 //    }
 
-    private static Complex randomComplex() {
-        boolean realNeg = random.nextFloat() > 0.5f;
-        boolean imagNeg = random.nextFloat() > 0.5f;
-        double randReal = random.nextDouble();
-        double randImag = random.nextDouble();
-        if (realNeg) {
-            randReal = -randReal;
-        }
-        if (imagNeg) {
-            randImag = -randImag;
-        }
-        return new Complex(randReal, randImag);
-    }
+
 
 }

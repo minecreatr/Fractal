@@ -1,6 +1,7 @@
 package com.minecreatr.fractal.display;
 
 import com.minecreatr.fractal.Bootstrap;
+import com.minecreatr.fractal.FractalManager;
 import com.minecreatr.fractal.math.Complex;
 import com.minecreatr.fractal.logic.Fractal;
 
@@ -8,6 +9,7 @@ import javax.imageio.*;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public class ControlPanel extends JPanel implements ActionListener {
+public class ControlPanel extends JPanel {
 
     private JButton saveButton;
     private JButton randomButton;
@@ -30,27 +32,29 @@ public class ControlPanel extends JPanel implements ActionListener {
 
     private JButton copy;
 
+    private JButton paste;
+
     private JButton toggleBW;
 
-    private Map<String, Function<ActionEvent, String>> actions;
+    private JComboBox<String> fractalTypes;
 
-    private Map<String, JButton> buttonMap;
+    //private Map<String, Function<ActionEvent, String>> actions;
+
+    //private Map<String, JComponent> componentMap;
 
     public ControlPanel(){
     }
 
     public void init(){
-        this.actions = new HashMap<>();
-        this.buttonMap = new HashMap<>();
+        //this.actions = new HashMap<>();
+        //this.componentMap = new HashMap<>();
 
         this.saveButton = new JButton("Save");
-        this.saveButton.setActionCommand("save_image");
-        addButton(this.saveButton);
-        addAction(this.saveButton, (event) -> {
+        this.saveButton.addActionListener((event) -> {
             String name = JOptionPane.showInputDialog("Please name the fractal.");
 
             if (name == null || name.equalsIgnoreCase("null")){
-                return "";
+                return;
             }
 
             System.out.println("Saving Fractal...");
@@ -64,29 +68,26 @@ public class ControlPanel extends JPanel implements ActionListener {
                 JOptionPane.showMessageDialog(this, "Could not save fractal to file " + name + ".png");
                 System.err.println("Saving failed!");
             }
-            return "";
         });
+        this.add(this.saveButton);
 
-        this.randomButton = new JButton("Random");
-        this.randomButton.setActionCommand("next_fractal");
-        addButton(this.randomButton);
-        addAction(this.randomButton, (event) -> {
+        this.randomButton = new JButton("New Random");
+        this.randomButton.addActionListener((event) -> {
             Bootstrap.mainInstance.getFractalManager().next();
             Bootstrap.mainInstance.getDisplayManager().updateDisplay();
             updateText();
             this.lastButton.setEnabled(true);
             if (Bootstrap.mainInstance.getFractalManager().hasNext()){
-                return "Next";
+                this.randomButton.setText("Next");
             }
             else {
-                return "Random";
+                this.randomButton.setText("New Random");
             }
         });
+        this.add(this.randomButton);
 
         this.lastButton = new JButton("Previous");
-        this.lastButton.setActionCommand("previous_fractal");
-        addButton(this.lastButton);
-        addAction(this.lastButton, (event) -> {
+        this.lastButton.addActionListener((event) -> {
             if (Bootstrap.mainInstance.getFractalManager().hasPrevious()) {
                 Bootstrap.mainInstance.getFractalManager().previous();
                 updateText();
@@ -96,9 +97,9 @@ public class ControlPanel extends JPanel implements ActionListener {
                     this.lastButton.setEnabled(false);
                 }
             }
-            return "";
         });
         this.lastButton.setEnabled(false);
+        this.add(this.lastButton);
 
         this.dataReal = new JLabel("Real: 0");
         this.dataImag = new JLabel("Imaginary: 0i");
@@ -106,20 +107,35 @@ public class ControlPanel extends JPanel implements ActionListener {
         this.add(this.dataImag);
 
         this.copy = new JButton("Copy Complex constants to keyboard.");
-        this.copy.setActionCommand("copy_constants");
-        addButton(this.copy);
-        addAction(this.copy, (event) -> {
+        this.copy.addActionListener((event) -> {
             System.out.println("Copying numbers to clipboard...");
             Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
             StringSelection selection = new StringSelection(Bootstrap.mainInstance.getFractalManager().getCurrentFractal().getConstants().toString());
             clip.setContents(selection, null);
-            return "";
         });
+        this.add(this.copy);
+
+        this.paste = new JButton("Copy Constants from keyboard.");
+        this.paste.addActionListener((event) -> {
+            System.out.println("Reading numbers from clipboard.");
+            try {
+                Clipboard clip = Toolkit.getDefaultToolkit().getSystemClipboard();
+                String constants = (String)clip.getData(DataFlavor.stringFlavor);
+                Complex com = Complex.fromString(constants);
+                Bootstrap.mainInstance.getFractalManager().newFractal(com);
+                Bootstrap.mainInstance.getDisplayManager().updateDisplay();
+                updateText();
+                this.lastButton.setEnabled(true);
+
+            } catch (Exception exception){
+                System.out.println("Error reading constants from keyboard!");
+                exception.printStackTrace();
+            }
+        });
+        this.add(this.paste);
 
         this.toggleBW = new JButton("Enable Black & White");
-        this.toggleBW.setActionCommand("toggle_bw");
-        addButton(this.toggleBW);
-        addAction(this.toggleBW, (event) -> {
+        this.toggleBW.addActionListener((event) -> {
             boolean enableText = false;
             if (Bootstrap.mainInstance.getFractalGenerator().isRenderType("blackAndWhite")){
                 Bootstrap.mainInstance.getFractalGenerator().setRenderType("classic");
@@ -133,12 +149,20 @@ public class ControlPanel extends JPanel implements ActionListener {
             });
             Bootstrap.mainInstance.getDisplayManager().updateDisplay();
             if (enableText){
-                return "Enable Black & White";
+                this.toggleBW.setText("Enable Black & White");
             }
             else {
-                return "Disable Black & White";
+                this.toggleBW.setText("Disable Black & White");
             }
         });
+        this.add(this.toggleBW);
+
+        this.fractalTypes = new JComboBox<String>(Bootstrap.mainInstance.getFractalGenerator().getFractalTypes().toArray(new String[]{}));
+        this.fractalTypes.addActionListener((event) -> {
+            Bootstrap.mainInstance.getFractalGenerator().setFractalType((String)this.fractalTypes.getSelectedItem());
+            System.out.println("Changed type to: " + this.fractalTypes.getSelectedItem());
+        });
+        this.add(this.fractalTypes);
 
     }
 
@@ -153,21 +177,48 @@ public class ControlPanel extends JPanel implements ActionListener {
         return new Dimension(width, height);
     }
 
-    private void addButton(AbstractButton button){
-        button.addActionListener(this);
-        this.add(button);
-    }
+//    private void addComponent(JComponent component){
+//        addActionListener(component, this);
+//        this.add(component);
+//    }
 
-    private void addAction(JButton button, Function<ActionEvent, String> action){
-        this.actions.put(button.getActionCommand(), action);
-        this.buttonMap.put(button.getActionCommand(), button);
-    }
+//    private void addAction(JComponent component, Function<ActionEvent, String> action){
+//        this.actions.put(getActionCommand(component), action);
+//        this.componentMap.put(getActionCommand(component), component);
+//    }
 
-    @Override
-    public void actionPerformed(ActionEvent e){
-        String newVal = this.actions.getOrDefault(e.getActionCommand(), (event) -> {return "";}).apply(e);
-        if ((newVal != null && !newVal.equals("")) && this.buttonMap.containsKey(e.getActionCommand())){
-            this.buttonMap.get(e.getActionCommand()).setText(newVal);
-        }
-    }
+//    @Override
+//    public void actionPerformed(ActionEvent e){
+//        String newVal = this.actions.getOrDefault(e.getActionCommand(), (event) -> {return "";}).apply(e);
+//        if ((newVal != null && !newVal.equals("")) && this.componentMap.containsKey(e.getActionCommand())){
+//            setText(this.componentMap.get(e.getActionCommand()), newVal);
+//        }
+//    }
+
+//    private String getActionCommand(JComponent component){
+//        if (component instanceof AbstractButton){
+//            return ((AbstractButton)component).getActionCommand();
+//        }
+//        else if (component instanceof JComboBox){
+//            return ((JComboBox)component).getActionCommand();
+//        }
+//        else {
+//            return null;
+//        }
+//    }
+//
+//    private void addActionListener(JComponent component, ActionListener listener){
+//        if (component instanceof AbstractButton){
+//            ((AbstractButton)component).addActionListener(listener);
+//        }
+//        else if (component instanceof JComboBox){
+//            ((JComboBox)component).addActionListener(listener);
+//        }
+//    }
+//
+//    private void setText(JComponent component, String text){
+//        if (component instanceof AbstractButton){
+//            ((AbstractButton) component).setText(text);
+//        }
+//    }
 }

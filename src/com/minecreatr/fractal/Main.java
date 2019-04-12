@@ -5,6 +5,7 @@ import com.minecreatr.fractal.display.render.RenderFractalBlackAndWhite;
 import com.minecreatr.fractal.display.render.RenderFractalClassic;
 import com.minecreatr.fractal.logic.Fractal;
 import com.minecreatr.fractal.logic.JuliaFractalLogic;
+import com.minecreatr.fractal.logic.MandelbrotFractalLogic;
 import com.minecreatr.fractal.math.Complex;
 
 import javax.swing.*;
@@ -79,6 +80,7 @@ public class Main {
         this.fractalGenerator = new FractalGenerator();
 
         this.fractalGenerator.addFractalType("julia", new JuliaFractalLogic());
+        this.fractalGenerator.addFractalType("mandelbrot", new MandelbrotFractalLogic());
         this.fractalGenerator.addRenderType("classic", new RenderFractalClassic());
         this.fractalGenerator.addRenderType("blackAndWhite", new RenderFractalBlackAndWhite());
 

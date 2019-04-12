@@ -1,6 +1,7 @@
 package com.minecreatr.fractal;
 
 import com.minecreatr.fractal.logic.Fractal;
+import com.minecreatr.fractal.math.Complex;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -38,9 +39,17 @@ public class FractalManager {
             this.nextFractals.remove(this.currentFractal);
         }
         else {
-            this.previousFractals.add(this.currentFractal);
-            this.currentFractal = new Fractal();
+            newFractal();
         }
+    }
+
+    public void newFractal(Complex constant){
+        this.previousFractals.add(this.currentFractal);
+        this.currentFractal = new Fractal(constant);
+    }
+
+    public void newFractal(){
+        newFractal(Complex.randomComplex());
     }
 
     public boolean hasPrevious(){

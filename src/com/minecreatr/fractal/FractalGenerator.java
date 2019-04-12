@@ -8,6 +8,7 @@ import com.minecreatr.fractal.math.Complex;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Generate the fractal
@@ -55,5 +56,9 @@ public class FractalGenerator {
         this.currentRender.renderFractal(image, data);
         System.out.println("Done Rendering");
         return image;
+    }
+
+    public Set<String> getFractalTypes(){
+        return this.fractalTypes.keySet();
     }
 }
